@@ -18,7 +18,7 @@ namespace DataMap.Mapper
             return MappingDataSingleton.Instance.TypeMaps.Single(x => x.Key == typeof(T)).Value;
         }
 
-		public T Map<U>(U mapFrom)
+		public T? Map<U>(U mapFrom)
 		{
 			var mappingData = GetMappingData();
 
@@ -29,12 +29,15 @@ namespace DataMap.Mapper
 
 			if(mapFrom == null)
 			{
-				throw new ArgumentNullException($"Cannot map a null object");
+				throw new NullReferenceException($"Cannot map a null object");
 			}
-			// using the information contained within attributeMapping convert U to T
-			// iterate over the properties in T then set the properties from the content in U if a mapping exists
-			// no mapping setup = no copy
-			object toRet = Activator.CreateInstance(mappingData.MapsTo);
+
+            if (mappingData.MapsTo == null) throw new NullReferenceException("Cannot map to null");
+			if (mappingData.AttributeMapping == null) throw new NullReferenceException("No data mapping found");
+            // using the information contained within attributeMapping convert U to T
+            // iterate over the properties in T then set the properties from the content in U if a mapping exists
+            // no mapping setup = no copy
+            object toRet = Activator.CreateInstance(mappingData.MapsTo) ?? throw new NullReferenceException("Cannot map to null");
 			dynamic toMapDynamic = mapFrom;
 
 			PropertyInfo[] propertyList = mappingData.MapsTo.GetProperties();
@@ -60,7 +63,7 @@ namespace DataMap.Mapper
 			return toRet as T;
 		}
 
-        public U ReverseMap<U>() where U : class
+        public U? ReverseMap<U>() where U : class
 		{
             var mappingData = GetMappingData();
 
@@ -73,10 +76,12 @@ namespace DataMap.Mapper
             {
                 throw new ArgumentException($"Cannot map between {typeof(U)} and {typeof(T)} please use a {mappingData.MapsFrom?.Name} type instead");
             }
+
+            if (mappingData.AttributeMapping == null) throw new NullReferenceException("No data mapping found");
             // using the information contained within attributeMapping convert T to U
             // iterate over the properties in U then set the properties from the content in T if a mapping exists
             // no mapping setup = no copy
-            object toRet = Activator.CreateInstance(mappingData.MapsFrom);
+            object toRet = Activator.CreateInstance(mappingData.MapsFrom) ?? throw new Exception("Cannot map to null");
             PropertyInfo[] propertyList = mappingData.MapsFrom.GetProperties();
 
             foreach (var targetProperty in propertyList)
