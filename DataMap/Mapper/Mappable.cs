@@ -4,106 +4,30 @@ using System.Xml.Serialization;
 using DataMap.Atrributes;
 using DataMap.Singleton;
 using DataMap.Models;
+using System.Linq.Expressions;
+
 namespace DataMap.Mapper
 {
 	public class Mappable<T> where T : class
 	{
-		private static MappingData GetMappingData()
+
+		public T? Map<U>(U mapFrom) where U : class
 		{
-			if(!MappingDataSingleton.Instance.TypeMaps.ContainsKey(typeof(T)))
-			{
-                MappingDataSingleton.Instance.TypeMaps.Add(typeof(T), new MappingData(typeof(T)));
-            }
-
-            return MappingDataSingleton.Instance.TypeMaps.Single(x => x.Key == typeof(T)).Value;
-        }
-
-		public T? Map<U>(U mapFrom)
-		{
-			var mappingData = GetMappingData();
-
-			if(typeof(U) != mappingData.MapsFrom)
-			{
-				throw new ArgumentException($"Cannot map between {typeof(U)} and {typeof(T)} please use a {mappingData.MapsFrom?.Name} type instead");
-			}
-
-			if(mapFrom == null)
-			{
-				throw new NullReferenceException($"Cannot map a null object");
-			}
-
-            if (mappingData.MapsTo == null) throw new NullReferenceException("Cannot map to null");
-			if (mappingData.AttributeMapping == null) throw new NullReferenceException("No data mapping found");
-            // using the information contained within attributeMapping convert U to T
-            // iterate over the properties in T then set the properties from the content in U if a mapping exists
-            // no mapping setup = no copy
-            object toRet = Activator.CreateInstance(mappingData.MapsTo) ?? throw new NullReferenceException("Cannot map to null");
-			dynamic toMapDynamic = mapFrom;
-
-			PropertyInfo[] propertyList = mappingData.MapsTo.GetProperties();
-
-			foreach(var targetProperty in propertyList)
-			{
-				if (targetProperty == null) continue;
-
-				// get origin property from attribute mapping dictionary
-				var originProperty = mappingData.AttributeMapping.FirstOrDefault(x => x.Value.Name == targetProperty.Name && x.Value.MemberType == targetProperty.MemberType).Key;
-
-				if(originProperty == null)
-				{
-					throw new ArgumentException($"Unable to find origin property for {targetProperty.Name}");
-				}
-
-				var originValue = originProperty.GetValue(mapFrom);
-
-				targetProperty.SetValue(toRet, originValue);
-				targetProperty.SetValue(this, originValue);
-			}
-
-			return toRet as T;
+			var res = Mapper.Map<U, T>(mapFrom);
+			return res;
 		}
 
         public U? ReverseMap<U>() where U : class
 		{
-            var mappingData = GetMappingData();
-
-            if (mappingData.IsRevserable != true)
-			{
-				throw new ArgumentException($"Reverse mapping not enabled for type {typeof(T)}");
-			}
-
-            if (typeof(U) != mappingData.MapsFrom)
-            {
-                throw new ArgumentException($"Cannot map between {typeof(U)} and {typeof(T)} please use a {mappingData.MapsFrom?.Name} type instead");
-            }
-
-            if (mappingData.AttributeMapping == null) throw new NullReferenceException("No data mapping found");
-            // using the information contained within attributeMapping convert T to U
-            // iterate over the properties in U then set the properties from the content in T if a mapping exists
-            // no mapping setup = no copy
-            object toRet = Activator.CreateInstance(mappingData.MapsFrom) ?? throw new Exception("Cannot map to null");
-            PropertyInfo[] propertyList = mappingData.MapsFrom.GetProperties();
-
-            foreach (var targetProperty in propertyList)
-            {
-				if (targetProperty == null) continue;
-
-				// get origin property from attribute mapping directory
-				var originProperty = mappingData.AttributeMapping.FirstOrDefault(x => x.Key.Name == targetProperty.Name && x.Key.MemberType == targetProperty.MemberType).Value;
-
-                if (originProperty == null)
-                {
-                    throw new ArgumentException($"Unable to find origin property for {targetProperty.Name}");
-                }
-
-				var originValue = originProperty.GetValue(this);
-
-				targetProperty.SetValue(toRet, originValue);
-
-            }
-
-            return toRet as U;
+			var res = Mapper.Map<T, U>(this as T);
+			return res;
         }
+
+		public Expression MapExpresion<U>(Expression<Func<T, bool>> expression) where U : class
+		{
+			var res = Mapper.MapExpresion<T, U>(expression);
+			return res;
+		}
     }
 }
 
