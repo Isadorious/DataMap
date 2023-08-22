@@ -81,14 +81,14 @@ namespace DataMap.Mapper
         /// <exception cref="NullReferenceException"></exception>
         public static TOutput? ReverseMap<TInput, TOutput>(TInput objectToMap) where TInput : class where TOutput : class
         {
-            var mappingData = GetMappingData<TOutput>();
+            var mappingData = GetMappingData<TInput>();
 
             if (mappingData.IsRevserable != true)
             {
-                throw new ArgumentException($"Reverse mapping not enabled for type {typeof(TOutput)}");
+                throw new ArgumentException($"Reverse mapping not enabled for type {typeof(TInput)}");
             }
 
-            if (typeof(TInput) != mappingData.MapsFrom)
+            if (typeof(TOutput) != mappingData.MapsFrom)
             {
                 throw new ArgumentException($"Cannot map between {typeof(TInput)} and {typeof(TOutput)} please use a {mappingData.MapsFrom?.Name} type instead");
             }

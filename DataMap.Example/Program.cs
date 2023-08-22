@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DataMap.Example.Models;
+using DataMap.Mapper;
 
 Console.WriteLine("Hello, World!");
 
@@ -13,9 +14,8 @@ DataModel dataModel = new()
 
 Console.WriteLine($"Created data model:: {dataModel}");
 
-LogicModel logicModel = new();
-
-logicModel.Map(dataModel);
+//logicModel.Map(dataModel);
+var logicModel = Mapper.Map<DataModel, LogicModel>(dataModel);
 
 Console.WriteLine("Mapped logic model");
 Console.WriteLine($"logic model:: {logicModel}");
@@ -29,7 +29,9 @@ logicModel2.CreatedAt = DateTime.Now;
 Console.WriteLine("Created logic model");
 Console.WriteLine($"logicModel2:: {logicModel2}");
 
-var dataModel2 = logicModel2.ReverseMap<DataModel>();
+//var dataModel2 = logicModel2.ReverseMap<DataModel>();
+
+var dataModel2 = Mapper.ReverseMap<LogicModel, DataModel>(logicModel2);
 
 Console.WriteLine("Reverse mapped data model");
 Console.WriteLine($"dataModel2:: {dataModel2}");
