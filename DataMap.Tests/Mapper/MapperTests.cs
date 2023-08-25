@@ -18,6 +18,7 @@ namespace DataMap.Tests.Mapper
         public DateTime CreatedAt { get; set; }
         [MapFrom("DataIsEnabled")]
         public bool IsEnabled { get; set; }
+        public int SecondaryId { get; set; }
     }
 
 	public class DataObject
@@ -26,6 +27,7 @@ namespace DataMap.Tests.Mapper
         public string DataName { get; set; }
         public DateTime DataCreatedAt { get; set; }
         public bool DataIsEnabled { get; set; }
+        public int SecondaryId { get; set; }
     }
 
 	public class MapperTests

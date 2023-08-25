@@ -59,7 +59,7 @@ namespace DataMap.Mapper
 
                 if (originProperty == null)
                 {
-                    throw new ArgumentException($"Unable to find origin property for {targetProperty.Name}");
+                    continue; // doesn't throw error here - considers that some properties won't be mapped
                 }
 
                 var originValue = originProperty.GetValue(objectToMap);
@@ -110,7 +110,7 @@ namespace DataMap.Mapper
 
                 if (originProperty == null)
                 {
-                    throw new ArgumentException($"Unable to find origin property for {targetProperty.Name}");
+                    continue; // doesn't throw error here - considers that some properties won't be mapped
                 }
 
                 var originValue = originProperty.GetValue(objectToMap);
