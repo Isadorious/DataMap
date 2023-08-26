@@ -5,7 +5,7 @@ namespace DataMap.Example.Models
 {
     [MapFrom(typeof(DataModel))]
     [MapReversible]
-	public class LogicModel : Mappable<LogicModel>
+	public class LogicModel
 	{
 		public LogicModel()
 		{

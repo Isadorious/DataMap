@@ -30,6 +30,19 @@ namespace DataMap.Tests.Mapper
         public int SecondaryId { get; set; }
     }
 
+    [MapFrom(typeof(DataObject))]
+    public class NonReversibleLogicObject
+    {
+        [MapFrom("DataId")]
+        public int Id { get; set; }
+        [MapFrom("DataName")]
+        public string Name { get; set; }
+        [MapFrom("DataCreatedAt")]
+        public DateTime CreatedAt { get; set; }
+        [MapFrom("DataIsEnabled")]
+        public bool IsEnabled { get; set; }
+    }
+
 	public class MapperTests
 	{
         [Fact]
@@ -89,6 +102,41 @@ namespace DataMap.Tests.Mapper
             Assert.True(logicObject != null);
             Assert.True(dataObject.DataId == logicObject.Id);
         }
-	}
+
+        [Fact]
+        public void Test_NonReversibleMap()
+        {
+            NonReversibleLogicObject mappedData = new()
+            {
+                Id = 1,
+                Name = "Test",
+                CreatedAt = new DateTime(2023, 8, 23),
+                IsEnabled = true,
+            };
+
+            Action act = () => DataMap.Mapper.Mapper.ReverseMap<NonReversibleLogicObject, DataObject>(mappedData);
+            
+            ArgumentException argEx = Assert.Throws<ArgumentException>(act);
+            Assert.Equal("Reverse mapping not enabled for type DataMap.Tests.Mapper.NonReversibleLogicObject", argEx.Message);
+        }
+
+        [Fact]
+        public void Test_NoMapping()
+        {
+            NonReversibleLogicObject mappedData = new()
+            {
+                Id = 1,
+                Name = "Test",
+                CreatedAt = new DateTime(2023, 8, 23),
+                IsEnabled = true,
+            };
+
+            Action act = () => DataMap.Mapper.Mapper.Map<NonReversibleLogicObject, LogicObject>(mappedData);
+
+            ArgumentException argEx = Assert.Throws<ArgumentException>(act);
+            Assert.Equal($"Cannot map between DataMap.Tests.Mapper.NonReversibleLogicObject and DataMap.Tests.Mapper.LogicObject please use a DataObject type instead", argEx.Message);
+        }
+
+    }
 }
 
